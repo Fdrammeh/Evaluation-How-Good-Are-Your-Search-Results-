@@ -1,5 +1,5 @@
 """
-L7 — Evaluate Your Search System  (STARTER)
+L7 — Evaluate Your Search System 
 =============================================
 Run with:
     python starter.py
@@ -115,15 +115,15 @@ collection.upsert(
 # TODO: Define eval_set — a list of dicts, each with:
 #   "query":        the natural language query string
 #   "relevant_ids": list of document IDs that are truly relevant
-def eval_set():
-    return [
-        {"query": "How does FastAPI validate request data?", "relevant_ids": ["doc_01", "doc_02"]},
-        {"query": "What are Python lists and how do they work?", "relevant_ids": ["doc_04"]},
-        {"query": "Explain ChromaDB and its use cases.", "relevant_ids": ["doc_07", "doc_08", "doc_09"]},
-        {"query": "How can I build interactive apps with Streamlit?", "relevant_ids": ["doc_10", "doc_11", "doc_12"]},
-        {"query": "What is the difference between Python dictionaries and lists?", "relevant_ids": ["doc_04", "doc_05"]},
-        {"query": "How does semantic search differ from keyword search?", "relevant_ids": ["doc_09"]},
-    ]
+# def eval_set():
+#     return [
+#         {"query": "How does FastAPI validate request data?", "relevant_ids": ["doc_01", "doc_02"]},
+#         {"query": "What are Python lists and how do they work?", "relevant_ids": ["doc_04"]},
+#         {"query": "Explain ChromaDB and its use cases.", "relevant_ids": ["doc_07", "doc_08", "doc_09"]},
+#         {"query": "How can I build interactive apps with Streamlit?", "relevant_ids": ["doc_10", "doc_11", "doc_12"]},
+#         {"query": "What is the difference between Python dictionaries and lists?", "relevant_ids": ["doc_04", "doc_05"]},
+#         {"query": "How does semantic search differ from keyword search?", "relevant_ids": ["doc_09"]},
+#     ]
 eval_set = [
     # TODO — at least 6 entries
     # {"query": "...", "relevant_ids": ["doc_01", "doc_05"]},
@@ -152,40 +152,54 @@ def evaluate(n_results: int, distance_threshold: float = None):
     recalls    = []
 
     for i, entry in enumerate(eval_set, 1):
-        query        = entry["query"]
+        query = entry["query"]
         relevant_ids = set(entry["relevant_ids"])
 
         # TODO: Query the collection with query_texts=[query], n_results=n_results
         #       include ["ids", "distances"]
         results = None  # replace with actual query
-    results = collection.query(
+        results = collection.query(
         query_texts=[query],
         n_results=n_results,
         include=["distances"])
 
         # TODO: Extract retrieved IDs from results["ids"][0]
-    #retrieved_ids = []
-    retrieved_ids = results["ids"][0]
+        #retrieved_ids = []
+        retrieved_ids = results["ids"][0]
+        distances = results["distances"][0]
 
         # TODO: If distance_threshold is set, filter out IDs whose distance
         #       exceeds the threshold
-    if distance_threshold is not None:
+        
+        if distance_threshold is not None:
             # Filter retrieved IDs based on distance threshold
-        retrieved_ids = [doc_id for doc_id, dist in zip(retrieved_ids, results["distances"][0]) if dist <= distance_threshold]
+            retrieved_ids = [
+                doc_id 
+                for doc_id, dist in zip(retrieved_ids, results["distances"][0]) 
+                if dist <= distance_threshold
+            ]
 
         # TODO: Compute precision and recall
         overlap   = len(relevant_ids & set(retrieved_ids))
-        precision = overlap / len(retrieved_ids)  if len(retrieved_ids) > 0 else 0
-        recall    = overlap / len(relevant_ids)   if len(relevant_ids) > 0 else 0
+        
+        precision = (
+            overlap / len(retrieved_ids)  
+            if retrieved_ids else 0)
+
+        recall = (
+            overlap / len(relevant_ids)   
+            if relevant_ids else 0)
 
         precisions.append(precision)
         recalls.append(recall)
 
-        print(f"  Query {i}: P={precision*100:.1f}%  R={recall*100:.1f}%  "
-              f"| '{query[:50]}'")
+        print(
+            f"  Query {i}: P={precision*100:.1f}% "
+            f"R={recall*100:.1f}% | '{query[:50]}'"
+            )
 
     avg_p = sum(precisions) / len(precisions) if precisions else 0
-    avg_r = sum(recalls)    / len(recalls)    if recalls    else 0
+    avg_r = sum(recalls) / len(recalls)    if recalls    else 0
     print(f"  AVERAGE: P={avg_p*100:.1f}%  R={avg_r*100:.1f}%")
     return avg_p, avg_r
 
@@ -205,7 +219,7 @@ print("\n=== ANALYSIS ===")
 #         - Which queries failed? What caused the low score?
 #         - What would you change to improve the weakest queries?
 #         - How did increasing n_results affect precision vs recall?
-print("TODO: write your analysis here")
+#"TODO: write your analysis here")
 print("""
 - Some queries performed well because they had clear, specific keywords that matched the documents in the collection. For example, queries about FastAPI and Streamlit had high precision and recall due to the presence of relevant documents with matching topics.
 
